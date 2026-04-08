@@ -61,6 +61,7 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: undefined,
           port: undefined,
           devUrl: undefined,
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_HOME, resolve(homedir(), ".t3"));
@@ -82,6 +83,7 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: "0.0.0.0",
           port: 4222,
           devUrl: new URL("http://localhost:7331"),
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_HOME, resolve("/tmp/custom-t3"));
@@ -112,6 +114,7 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: undefined,
           port: undefined,
           devUrl: undefined,
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_MODE, "web");
@@ -134,6 +137,7 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: undefined,
           port: undefined,
           devUrl: undefined,
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_LOG_WS_EVENTS, "0");
@@ -155,9 +159,54 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: undefined,
           port: undefined,
           devUrl: undefined,
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_HOME, resolve("/tmp/my-t3"));
+      }),
+    );
+
+    it.effect("sets T3CODE_STATE_DIR=userdata when prodData is true", () =>
+      Effect.gen(function* () {
+        const env = yield* createDevRunnerEnv({
+          mode: "dev:desktop",
+          baseEnv: {},
+          serverOffset: 0,
+          webOffset: 0,
+          t3Home: undefined,
+          authToken: undefined,
+          noBrowser: undefined,
+          autoBootstrapProjectFromCwd: undefined,
+          logWebSocketEvents: undefined,
+          host: undefined,
+          port: undefined,
+          devUrl: undefined,
+          prodData: true,
+        });
+
+        assert.equal(env.T3CODE_STATE_DIR, "userdata");
+      }),
+    );
+
+    it.effect("does not set T3CODE_STATE_DIR when prodData is false", () =>
+      Effect.gen(function* () {
+        const env = yield* createDevRunnerEnv({
+          mode: "dev",
+          baseEnv: {},
+          serverOffset: 0,
+          webOffset: 0,
+          t3Home: undefined,
+          authToken: undefined,
+          noBrowser: undefined,
+          autoBootstrapProjectFromCwd: undefined,
+          logWebSocketEvents: undefined,
+          host: undefined,
+          port: undefined,
+          devUrl: undefined,
+          prodData: false,
+        });
+
+        assert.equal(env.T3CODE_STATE_DIR, undefined);
       }),
     );
 
@@ -183,6 +232,7 @@ it.layer(NodeServices.layer)("dev-runner", (it) => {
           host: "127.0.0.1",
           port: 4222,
           devUrl: undefined,
+          prodData: false,
         });
 
         assert.equal(env.T3CODE_HOME, resolve("/tmp/my-t3"));

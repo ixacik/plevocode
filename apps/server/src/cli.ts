@@ -81,6 +81,12 @@ const logWebSocketEventsFlag = Flag.boolean("log-websocket-events").pipe(
   Flag.withAlias("log-ws-events"),
   Flag.optional,
 );
+const stateDirFlag = Flag.string("state-dir").pipe(
+  Flag.withDescription(
+    'Override the state directory name (e.g., "userdata" to use prod data in dev mode).',
+  ),
+  Flag.optional,
+);
 
 const EnvServerConfig = Config.all({
   logLevel: Config.logLevel("T3CODE_LOG_LEVEL").pipe(Config.withDefault("Info")),
@@ -133,6 +139,10 @@ const EnvServerConfig = Config.all({
     Config.option,
     Config.map(Option.getOrUndefined),
   ),
+  stateDirName: Config.string("T3CODE_STATE_DIR").pipe(
+    Config.option,
+    Config.map(Option.getOrUndefined),
+  ),
 });
 
 interface CliServerFlags {
@@ -147,6 +157,7 @@ interface CliServerFlags {
   readonly bootstrapFd: Option.Option<number>;
   readonly autoBootstrapProjectFromCwd: Option.Option<boolean>;
   readonly logWebSocketEvents: Option.Option<boolean>;
+  readonly stateDirName: Option.Option<string>;
 }
 
 const resolveBooleanFlag = (flag: Option.Option<boolean>, envValue: boolean) =>
@@ -226,10 +237,14 @@ export const resolveServerConfig = (
         ),
       ),
     );
+    const stateDirName = Option.getOrElse(
+      resolveOptionPrecedence(flags.stateDirName, Option.fromUndefinedOr(env.stateDirName)),
+      () => undefined,
+    );
     const rawCwd = Option.getOrElse(flags.cwd, () => process.cwd());
     const cwd = path.resolve(yield* expandHomePath(rawCwd.trim()));
     yield* fs.makeDirectory(cwd, { recursive: true });
-    const derivedPaths = yield* deriveServerPaths(baseDir, devUrl);
+    const derivedPaths = yield* deriveServerPaths(baseDir, devUrl, stateDirName);
     yield* ensureServerDirectories(derivedPaths);
     const persistedObservabilitySettings = yield* loadPersistedObservabilitySettings(
       derivedPaths.settingsPath,
@@ -352,6 +367,7 @@ const commandFlags = {
   bootstrapFd: bootstrapFdFlag,
   autoBootstrapProjectFromCwd: autoBootstrapProjectFromCwdFlag,
   logWebSocketEvents: logWebSocketEventsFlag,
+  stateDirName: stateDirFlag,
 } as const;
 
 const rootCommand = Command.make("t3", commandFlags).pipe(

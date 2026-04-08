@@ -33,6 +33,7 @@ export const ClientSettingsSchema = Schema.Struct({
   sidebarThreadSortOrder: SidebarThreadSortOrder.pipe(
     Schema.withDecodingDefault(() => DEFAULT_SIDEBAR_THREAD_SORT_ORDER),
   ),
+  terminalFontFamily: TrimmedString.pipe(Schema.withDecodingDefault(() => "")),
   timestampFormat: TimestampFormat.pipe(Schema.withDecodingDefault(() => DEFAULT_TIMESTAMP_FORMAT)),
 });
 export type ClientSettings = typeof ClientSettingsSchema.Type;

@@ -79,6 +79,21 @@ function compile(bindings: TestBinding[]): ResolvedKeybindingsConfig {
   }));
 }
 
+function plainShortcut(
+  key: string,
+  overrides: Partial<Omit<KeybindingShortcut, "key">> = {},
+): KeybindingShortcut {
+  return {
+    key,
+    metaKey: false,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    modKey: false,
+    ...overrides,
+  };
+}
+
 const DEFAULT_BINDINGS = compile([
   { shortcut: modShortcut("j"), command: "terminal.toggle" },
   {
@@ -104,6 +119,12 @@ const DEFAULT_BINDINGS = compile([
   { shortcut: modShortcut("o", { shiftKey: true }), command: "chat.new" },
   { shortcut: modShortcut("n", { shiftKey: true }), command: "chat.newLocal" },
   { shortcut: modShortcut("o"), command: "editor.openFavorite" },
+  { shortcut: plainShortcut("escape", { shiftKey: true }), command: "composer.focus" },
+  {
+    shortcut: plainShortcut("escape"),
+    command: "agent.interrupt",
+    whenAst: whenIdentifier("agentRunning"),
+  },
   { shortcut: modShortcut("[", { shiftKey: true }), command: "thread.previous" },
   { shortcut: modShortcut("]", { shiftKey: true }), command: "thread.next" },
   { shortcut: modShortcut("1"), command: "thread.jump.1" },
@@ -587,6 +608,76 @@ describe("terminalNavigationShortcutData", () => {
         event({ type: "keyup", key: "ArrowLeft", altKey: true }),
         "MacIntel",
       ),
+    );
+  });
+});
+
+describe("composer.focus shortcut", () => {
+  it("resolves Shift+Escape to composer.focus", () => {
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Escape", shiftKey: true }), DEFAULT_BINDINGS, {
+        platform: "MacIntel",
+      }),
+      "composer.focus",
+    );
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Escape", shiftKey: true }), DEFAULT_BINDINGS, {
+        platform: "Linux",
+      }),
+      "composer.focus",
+    );
+  });
+
+  it("resolves Shift+Escape to composer.focus even when agentRunning", () => {
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Escape", shiftKey: true }), DEFAULT_BINDINGS, {
+        platform: "MacIntel",
+        context: { agentRunning: true },
+      }),
+      "composer.focus",
+    );
+  });
+});
+
+describe("agent.interrupt shortcut", () => {
+  it("resolves Escape to agent.interrupt when agentRunning is true", () => {
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Escape" }), DEFAULT_BINDINGS, {
+        platform: "MacIntel",
+        context: { agentRunning: true },
+      }),
+      "agent.interrupt",
+    );
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Escape" }), DEFAULT_BINDINGS, {
+        platform: "Linux",
+        context: { agentRunning: true },
+      }),
+      "agent.interrupt",
+    );
+  });
+
+  it("does not resolve Escape to agent.interrupt when agentRunning is false", () => {
+    assert.isNull(
+      resolveShortcutCommand(event({ key: "Escape" }), DEFAULT_BINDINGS, {
+        platform: "MacIntel",
+        context: { agentRunning: false },
+      }),
+    );
+    assert.isNull(
+      resolveShortcutCommand(event({ key: "Escape" }), DEFAULT_BINDINGS, {
+        platform: "Linux",
+      }),
+    );
+  });
+
+  it("normalizes 'Esc' key name to match escape shortcut", () => {
+    assert.strictEqual(
+      resolveShortcutCommand(event({ key: "Esc" }), DEFAULT_BINDINGS, {
+        platform: "MacIntel",
+        context: { agentRunning: true },
+      }),
+      "agent.interrupt",
     );
   });
 });

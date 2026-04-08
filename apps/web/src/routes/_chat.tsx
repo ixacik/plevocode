@@ -40,6 +40,7 @@ function ChatRouteGlobalShortcuts() {
         context: {
           terminalFocus: isTerminalFocused(),
           terminalOpen,
+          agentRunning: false,
         },
       });
 

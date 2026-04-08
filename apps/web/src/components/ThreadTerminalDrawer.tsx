@@ -18,6 +18,8 @@ import {
 } from "react";
 import { Popover, PopoverPopup, PopoverTrigger } from "~/components/ui/popover";
 import { type TerminalContextSelection } from "~/lib/terminalContext";
+import { resolveTerminalFontFamily } from "~/lib/terminalFont";
+import { useSettings } from "~/hooks/useSettings";
 import { openInPreferredEditor } from "../editorPreferences";
 import {
   extractTerminalLinks,
@@ -77,8 +79,7 @@ export function selectPendingTerminalEventEntries(
 function terminalThemeFromApp(): ITheme {
   const isDark = document.documentElement.classList.contains("dark");
   const bodyStyles = getComputedStyle(document.body);
-  const background =
-    bodyStyles.backgroundColor || (isDark ? "rgb(14, 18, 24)" : "rgb(255, 255, 255)");
+  const background = isDark ? "#212121" : bodyStyles.backgroundColor || "rgb(255, 255, 255)";
   const foreground = bodyStyles.color || (isDark ? "rgb(237, 241, 247)" : "rgb(28, 33, 41)");
 
   if (isDark) {
@@ -255,6 +256,9 @@ function TerminalViewport({
   });
   const readTerminalLabel = useEffectEvent(() => terminalLabel);
 
+  const { terminalFontFamily } = useSettings();
+  const readTerminalFontFamily = useEffectEvent(() => terminalFontFamily);
+
   useEffect(() => {
     const mount = containerRef.current;
     if (!mount) return;
@@ -267,7 +271,7 @@ function TerminalViewport({
       lineHeight: 1.2,
       fontSize: 12,
       scrollback: 5_000,
-      fontFamily: '"SF Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace',
+      fontFamily: resolveTerminalFontFamily(readTerminalFontFamily()),
       theme: terminalThemeFromApp(),
     });
     terminal.loadAddon(fitAddon);
@@ -679,6 +683,16 @@ function TerminalViewport({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cwd, runtimeEnv, terminalId, threadId]);
 
+  // Dynamically update the terminal font when the setting changes without
+  // tearing down the terminal instance.
+  useEffect(() => {
+    const terminal = terminalRef.current;
+    const fitAddon = fitAddonRef.current;
+    if (!terminal || !fitAddon) return;
+    terminal.options.fontFamily = resolveTerminalFontFamily(terminalFontFamily);
+    fitAddon.fit();
+  }, [terminalFontFamily]);
+
   useEffect(() => {
     if (!autoFocus) return;
     const terminal = terminalRef.current;
@@ -1029,7 +1043,7 @@ export default function ThreadTerminalDrawer({
 
   return (
     <aside
-      className="thread-terminal-drawer relative flex min-w-0 shrink-0 flex-col overflow-hidden border-t border-border/80 bg-background"
+      className="thread-terminal-drawer relative flex min-w-0 shrink-0 flex-col overflow-hidden border-t border-border/80 bg-[#212121]"
       style={{ height: `${drawerHeight}px` }}
     >
       <div

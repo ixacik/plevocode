@@ -214,6 +214,10 @@ export function buildLegacyClientSettingsMigrationPatch(
     patch.sidebarThreadSortOrder = legacySettings.sidebarThreadSortOrder;
   }
 
+  if (Predicate.isString(legacySettings.terminalFontFamily)) {
+    patch.terminalFontFamily = legacySettings.terminalFontFamily;
+  }
+
   if (Schema.is(TimestampFormat)(legacySettings.timestampFormat)) {
     patch.timestampFormat = legacySettings.timestampFormat;
   }

@@ -47,6 +47,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.none(),
           logWebSocketEvents: Option.none(),
+          stateDirName: Option.none(),
         },
         Option.none(),
       ).pipe(
@@ -110,6 +111,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.some(true),
           logWebSocketEvents: Option.some(true),
+          stateDirName: Option.none(),
         },
         Option.some("Debug"),
       ).pipe(
@@ -187,6 +189,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.none(),
           logWebSocketEvents: Option.none(),
+          stateDirName: Option.none(),
         },
         Option.none(),
       ).pipe(
@@ -246,6 +249,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.none(),
           logWebSocketEvents: Option.none(),
+          stateDirName: Option.none(),
         },
         Option.none(),
       ).pipe(
@@ -304,6 +308,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.none(),
           logWebSocketEvents: Option.none(),
+          stateDirName: Option.none(),
         },
         Option.some("Debug"),
       ).pipe(
@@ -375,6 +380,7 @@ it.layer(NodeServices.layer)("cli config resolution", (it) => {
           bootstrapFd: Option.none(),
           autoBootstrapProjectFromCwd: Option.none(),
           logWebSocketEvents: Option.none(),
+          stateDirName: Option.none(),
         },
         Option.none(),
       ).pipe(

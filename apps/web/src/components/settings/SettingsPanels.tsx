@@ -879,6 +879,32 @@ export function GeneralSettingsPanel() {
         />
 
         <SettingsRow
+          title="Terminal font"
+          description="Override the terminal font family. Useful for Nerd Fonts. Leave empty for the default system monospace stack."
+          resetAction={
+            settings.terminalFontFamily !== DEFAULT_UNIFIED_SETTINGS.terminalFontFamily ? (
+              <SettingResetButton
+                label="terminal font"
+                onClick={() =>
+                  updateSettings({
+                    terminalFontFamily: DEFAULT_UNIFIED_SETTINGS.terminalFontFamily,
+                  })
+                }
+              />
+            ) : null
+          }
+          control={
+            <Input
+              value={settings.terminalFontFamily}
+              onChange={(e) => updateSettings({ terminalFontFamily: e.target.value })}
+              placeholder="SF Mono"
+              className="w-full sm:w-56"
+              aria-label="Terminal font family"
+            />
+          }
+        />
+
+        <SettingsRow
           title="Assistant output"
           description="Show token-by-token output while a response is in progress."
           resetAction={

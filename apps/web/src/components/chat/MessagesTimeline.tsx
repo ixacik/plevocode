@@ -408,27 +408,22 @@ export const MessagesTimeline = memo(function MessagesTimeline({
                     terminalContexts={terminalContexts}
                   />
                 )}
-                <div className="mt-1.5 flex items-center justify-end gap-2">
-                  <div className="flex items-center gap-1.5 opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100">
-                    {displayedUserMessage.copyText && (
-                      <MessageCopyButton text={displayedUserMessage.copyText} />
-                    )}
-                    {canRevertAgentWork && (
-                      <Button
-                        type="button"
-                        size="xs"
-                        variant="outline"
-                        disabled={isRevertingCheckpoint || isWorking}
-                        onClick={() => onRevertUserMessage(row.message.id)}
-                        title="Revert to this message"
-                      >
-                        <Undo2Icon className="size-3" />
-                      </Button>
-                    )}
-                  </div>
-                  <p className="text-right text-[10px] text-muted-foreground/30">
-                    {formatTimestamp(row.message.createdAt, timestampFormat)}
-                  </p>
+                <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100">
+                  {displayedUserMessage.copyText && (
+                    <MessageCopyButton text={displayedUserMessage.copyText} />
+                  )}
+                  {canRevertAgentWork && (
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="outline"
+                      disabled={isRevertingCheckpoint || isWorking}
+                      onClick={() => onRevertUserMessage(row.message.id)}
+                      title="Revert to this message"
+                    >
+                      <Undo2Icon className="size-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

@@ -127,6 +127,7 @@ interface CreateDevRunnerEnvInput {
   readonly host: string | undefined;
   readonly port: number | undefined;
   readonly devUrl: URL | undefined;
+  readonly prodData: boolean | undefined;
 }
 
 export function createDevRunnerEnv({
@@ -142,6 +143,7 @@ export function createDevRunnerEnv({
   host,
   port,
   devUrl,
+  prodData,
 }: CreateDevRunnerEnvInput): Effect.Effect<NodeJS.ProcessEnv, never, Path.Path> {
   return Effect.gen(function* () {
     const serverPort = port ?? BASE_SERVER_PORT + serverOffset;
@@ -195,6 +197,14 @@ export function createDevRunnerEnv({
       output.T3CODE_LOG_WS_EVENTS = logWebSocketEvents ? "1" : "0";
     } else {
       delete output.T3CODE_LOG_WS_EVENTS;
+    }
+
+    if (prodData) {
+      output.T3CODE_STATE_DIR = "userdata";
+      output.T3CODE_NO_DEVTOOLS = "1";
+    } else {
+      delete output.T3CODE_STATE_DIR;
+      delete output.T3CODE_NO_DEVTOOLS;
     }
 
     if (mode === "dev") {
@@ -357,6 +367,7 @@ interface DevRunnerCliInput {
   readonly host: string | undefined;
   readonly port: number | undefined;
   readonly devUrl: URL | undefined;
+  readonly prodData: boolean;
   readonly dryRun: boolean;
   readonly turboArgs: ReadonlyArray<string>;
 }
@@ -443,6 +454,7 @@ export function runDevRunnerWithInput(input: DevRunnerCliInput) {
       host: input.host,
       port: input.port,
       devUrl: input.devUrl,
+      prodData: input.prodData,
     });
 
     const selectionSuffix =
@@ -536,6 +548,12 @@ const devRunnerCli = Command.make("dev-runner", {
     Flag.withSchema(Schema.URLFromString),
     Flag.withDescription("Web dev URL override (forwards to VITE_DEV_SERVER_URL)."),
     Flag.withFallbackConfig(optionalUrlConfig("VITE_DEV_SERVER_URL")),
+  ),
+  prodData: Flag.boolean("prod-data").pipe(
+    Flag.withDescription(
+      "Use production data directory (userdata) instead of dev. Lets you dogfood with real sessions.",
+    ),
+    Flag.withDefault(false),
   ),
   dryRun: Flag.boolean("dry-run").pipe(
     Flag.withDescription("Resolve mode/ports/env and print, but do not spawn turbo."),

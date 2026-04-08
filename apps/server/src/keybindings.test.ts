@@ -73,6 +73,27 @@ it.layer(NodeServices.layer)("keybindings", (it) => {
     }),
   );
 
+  it.effect("parses escape shortcuts", () =>
+    Effect.sync(() => {
+      assert.deepEqual(parseKeybindingShortcut("shift+escape"), {
+        key: "escape",
+        metaKey: false,
+        ctrlKey: false,
+        shiftKey: true,
+        altKey: false,
+        modKey: false,
+      });
+      assert.deepEqual(parseKeybindingShortcut("escape"), {
+        key: "escape",
+        metaKey: false,
+        ctrlKey: false,
+        shiftKey: false,
+        altKey: false,
+        modKey: false,
+      });
+    }),
+  );
+
   it.effect("compiles valid rule with parsed when AST", () =>
     Effect.sync(() => {
       const compiled = compileResolvedKeybindingRule({
@@ -175,6 +196,8 @@ it.layer(NodeServices.layer)("keybindings", (it) => {
       assert.equal(defaultsByCommand.get("thread.next"), "mod+shift+]");
       assert.equal(defaultsByCommand.get("thread.jump.1"), "mod+1");
       assert.equal(defaultsByCommand.get("thread.jump.9"), "mod+9");
+      assert.equal(defaultsByCommand.get("composer.focus"), "shift+escape");
+      assert.equal(defaultsByCommand.get("agent.interrupt"), "escape");
     }),
   );
 

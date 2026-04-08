@@ -148,6 +148,12 @@ function backendChildEnv(): NodeJS.ProcessEnv {
   delete env.T3CODE_NO_BROWSER;
   delete env.T3CODE_HOST;
   delete env.T3CODE_DESKTOP_WS_URL;
+  // When T3CODE_STATE_DIR is explicitly set (e.g., dogfood mode), also strip
+  // VITE_DEV_SERVER_URL so the backend server doesn't see a devUrl and trigger
+  // dev-only behaviors (the desktop app loads the web UI directly from Vite).
+  if (env.T3CODE_STATE_DIR) {
+    delete env.VITE_DEV_SERVER_URL;
+  }
   return env;
 }
 
@@ -1407,7 +1413,9 @@ function createWindow(): BrowserWindow {
 
   if (isDevelopment) {
     void window.loadURL(process.env.VITE_DEV_SERVER_URL as string);
-    window.webContents.openDevTools({ mode: "detach" });
+    if (!process.env.T3CODE_NO_DEVTOOLS) {
+      window.webContents.openDevTools({ mode: "detach" });
+    }
   } else {
     void window.loadURL(`${DESKTOP_SCHEME}://app/index.html`);
   }

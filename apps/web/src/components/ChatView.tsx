@@ -2621,6 +2621,7 @@ export default function ChatView({ threadId }: ChatViewProps) {
       const shortcutContext = {
         terminalFocus: isTerminalFocused(),
         terminalOpen: Boolean(terminalState.terminalOpen),
+        agentRunning: phase === "running",
       };
 
       const command = resolveShortcutCommand(event, keybindings, {
@@ -2670,6 +2671,28 @@ export default function ChatView({ threadId }: ChatViewProps) {
         return;
       }
 
+      if (command === "composer.focus") {
+        event.preventDefault();
+        event.stopPropagation();
+        focusComposer();
+        return;
+      }
+
+      if (command === "agent.interrupt") {
+        event.preventDefault();
+        event.stopPropagation();
+        const api = readNativeApi();
+        if (api && activeThreadId) {
+          void api.orchestration.dispatchCommand({
+            type: "thread.turn.interrupt",
+            commandId: newCommandId(),
+            threadId: activeThreadId,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        return;
+      }
+
       const scriptId = projectScriptIdFromCommand(command);
       if (!scriptId || !activeProject) return;
       const script = activeProject.scripts.find((entry) => entry.id === scriptId);
@@ -2693,6 +2716,8 @@ export default function ChatView({ threadId }: ChatViewProps) {
     keybindings,
     onToggleDiff,
     toggleTerminalVisibility,
+    phase,
+    focusComposer,
   ]);
 
   const addComposerImages = (files: File[]) => {
@@ -4050,8 +4075,8 @@ export default function ChatView({ threadId }: ChatViewProps) {
               >
                 <div
                   className={cn(
-                    "rounded-[20px] border bg-card transition-colors duration-200 has-focus-visible:border-ring/45",
-                    isDragOverComposer ? "border-primary/70 bg-accent/30" : "border-border",
+                    "rounded-[20px] border border-transparent bg-[#212121] transition-colors duration-200",
+                    isDragOverComposer ? "border-primary/70 bg-accent/30" : "",
                     composerProviderState.composerSurfaceClassName,
                   )}
                 >
